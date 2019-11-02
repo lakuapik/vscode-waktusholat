@@ -2,7 +2,12 @@
 .vscode-test/**
 test/**
 .gitignore
-vsc-extension-quickstart.md
 **/jsconfig.json
 **/*.map
 **/.eslintrc.json
+
+# added after bundling
+node_modules
+out/
+src/
+webpack.config.js
