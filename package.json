@@ -2,15 +2,15 @@
 	"name": "waktusholat",
 	"displayName": "Waktu Sholat",
 	"description": "Ekstensi Visual Studio Code (vscode) untuk menampilkan dan mengingatkan waktu sholat.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "lakuapik",
 	"engines": {
 		"vscode": "^1.39.0"
 	},
 	"homepage": "https://github.com/lakuapik/vscode-waktusholat",
 	"repository": {
-	  "type": "git",
-	  "url": "https://github.com/lakuapik/vscode-waktusholat.git"
+		"type": "git",
+		"url": "https://github.com/lakuapik/vscode-waktusholat.git"
 	},
 	"categories": [
 		"Other"
@@ -18,12 +18,17 @@
 	"activationEvents": [
 		"*"
 	],
+	"icon": "icon.png",
 	"main": "./src/extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "waktusholat.update",
 				"title": "Waktu Sholat: Update"
+			},
+			{
+				"command": "waktusholat.selectCity",
+				"title": "Waktu Sholat: Pilih Kota"
 			}
 		],
 		"configuration": {
@@ -361,7 +366,7 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^5.2.6",
-		"@types/node": "^10.12.21",
+		"@types/node": "^10.17.3",
 		"@types/vscode": "^1.39.0",
 		"eslint": "^5.13.0",
 		"glob": "^7.1.4",
@@ -371,6 +376,7 @@
 	},
 	"dependencies": {
 		"lodash": "^4.17.15",
-		"request": "^2.88.0"
+		"request": "^2.88.0",
+		"request-promise": "^4.2.4"
 	}
 }
