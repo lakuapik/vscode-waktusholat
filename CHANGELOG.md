@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.0.2] - 2019-11-04
+### Added
+- Fungsi ketika status bar di klik
+
+### Fixed
+- Ganti style penulisan js
+- Update data waktu sholat
+
 ## [1.0.1] - 2019-11-02
 ### Added
 - Ikon
