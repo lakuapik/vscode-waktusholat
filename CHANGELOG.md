@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.0.3] - 2019-11-06
+### Added
+- Notifikasi 5 menit sebelum waktu sholat tiba
+- Alert untuk memilih kota saat pertama menjalankan ekstensi
+
+### Fixed
+- Status bar
+- Refactor kode
+
 ## [1.0.2] - 2019-11-04
 ### Added
 - Fungsi ketika status bar di klik
