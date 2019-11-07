@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.3] - 2019-11-08
+### Fixed
+- Waktu undefined setelah isya
+
 ## [1.0.3] - 2019-11-06
 ### Added
 - Notifikasi 5 menit sebelum waktu sholat tiba

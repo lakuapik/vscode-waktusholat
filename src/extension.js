@@ -77,7 +77,7 @@ const todayAdzans = () => {
 	return adzans.map(function(key, val) {
 		return {
 			'time': key,
-			'adzan': val,
+			'adzan': val.toString(),
 			'timestamp': new Date(today + ' ' + key).getTime(),
 			'timehuman': timeHuman(new Date(today + ' ' + key).getTime()),
 		}
@@ -233,19 +233,19 @@ const statusBarUpdate = () => {
 		(prevDiff <= 0 && prevDiff > -5 && prev.adzan == 'imsyak')
 		|| (prevDiff <= 0 && prevDiff > -10 && prev.adzan != 'imsyak')
 	){
-		text = _.isEmpty(prev)
+		text = _.isEmpty(prev.adzan)
 			 ? '🕌'
 			 : '🕌 WAKTUNYA '+ _.toUpper(prev.adzan);
-		tooltip = _.isEmpty(prev)
+		tooltip = _.isEmpty(prev.adzan)
 				? ''
 				: 'Waktu ' + prev.adzan + ' ' + prev.time + ' telah tiba!';
 	}
 	// default
 	else {
-		text = _.isEmpty(next)
+		text = _.isEmpty(next.adzan)
 			 ? '🕌'
 			 : '🕌 ' + next.adzan + ' ' + next.time;
-		tooltip = _.isEmpty(next)
+		tooltip = _.isEmpty(next.adzan)
 				? 'Alhamdulillah sudah 5 waktu.'
 				: 'Waktu ' + next.adzan + ' ' + next.timehuman;
 	}
