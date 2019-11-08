@@ -2,7 +2,7 @@
 	"name": "waktusholat",
 	"displayName": "Waktu Sholat",
 	"description": "Ekstensi Visual Studio Code (vscode) untuk menampilkan dan mengingatkan waktu sholat.",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"publisher": "lakuapik",
 	"engines": {
 		"vscode": "^1.39.0"

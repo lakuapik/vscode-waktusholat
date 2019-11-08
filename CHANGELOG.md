@@ -1,6 +1,10 @@
 # Change Log
 
-## [1.0.3] - 2019-11-08
+## [1.0.5] - 2019-11-08
+### Added
+- Screenshoot tampilan
+
+## [1.0.4] - 2019-11-08
 ### Fixed
 - Waktu undefined setelah isya
 
