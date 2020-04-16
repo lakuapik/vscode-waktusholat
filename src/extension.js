@@ -1,6 +1,7 @@
 const fs = require('fs');
 const _ = require('lodash');
 const vscode = require('vscode');
+const player = require('play-sound')({});
 const request = require('request-promise');
 
 const baseUrl = 'https://raw.githubusercontent.com/lakuapik/jadwalsholatorg/master/adzan/';
@@ -11,8 +12,10 @@ const year = todayUk.substr(6, 4);
 const day = todayUk.substr(0, 2);
 const today = year + '-' + month + '-' + day;
 
+let audio;
 let basePath;
 let statusBar;
+let statusBarAudio;
 
 /**
  * Get current city from configuration.
@@ -188,7 +191,7 @@ const cmdSelectCity = () => {
 
 	// show the quick pick
 	vscode.window.showQuickPick(cities, {
-		placeHolder: 'Waktu sholat mengikuti kota yang ditentukan.',
+		placeHolder: 'Jadwal Waktu sholat mengikuti kota yang ditentukan.',
 	}).then((value) => {
 		vscode.workspace.getConfiguration('waktusholat').update('kota', value, 1);
 	});
@@ -258,7 +261,9 @@ const statusBarUpdate = () => {
 	// show message
 	if (prevDiff == 0) {
 		vscode.window.showInformationMessage(statusBar.tooltip);
-		// TODO: play adzan with progress and cancelable
+		if (['shubuh', 'dzuhur', 'ashr', 'magrib', 'isya'].includes(next.adzan)) {
+			playAdzanSound(next.adzan == 'shubuh');
+		}
 	}
 	if (nextDiff == 5) {
 		vscode.window.showInformationMessage(statusBar.tooltip);
@@ -272,6 +277,42 @@ const statusBarUpdate = () => {
  */
 const statusBarSummary = () => {
 	vscode.window.showInformationMessage(statusBar.tooltip);
+}
+
+/**
+ * Play adzan sound from mp3 file.
+ *
+ * @param {boolean} isFajr
+ *
+ * @returns {void}
+ */
+const playAdzanSound = (isFajr = false) => {
+	console.log('playAdzanSound...');
+
+	const file = isFajr ? 'sheikh_abdul_karim_omar_fatani_al_makki_adzan_fajr.mp3'
+	                    : 'sheikh_abdul_karim_omar_fatani_al_makki_adzan.mp3';
+
+	audio = player.play('./sounds/' + file, (err, opts, next) => {
+		next = stopAdzanSound();
+	});
+
+	statusBarAudio = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+	statusBarAudio.text = '▶ Adzan Berkumandang...';
+	statusBarAudio.tooltip = '◼ Hentikan suara adzan.';
+	statusBarAudio.command = 'waktusholat.stopAdzanSound';
+	statusBarAudio.show();
+}
+
+/**
+ * Stop adzan sound.
+ *
+ * @returns {void}
+ */
+const stopAdzanSound = () => {
+	console.log('stopAdzanSound...');
+
+	audio && audio.kill();
+	statusBarAudio && statusBarAudio.dispose();
 }
 
 /**
@@ -315,7 +356,8 @@ const activate = (context) => {
 		statusBar,
 		vscode.commands.registerCommand('waktusholat.update', cmdUpdate),
 		vscode.commands.registerCommand('waktusholat.selectCity', cmdSelectCity),
-		vscode.commands.registerCommand('waktusholat.statusBarSummary', statusBarSummary)
+		vscode.commands.registerCommand('waktusholat.statusBarSummary', statusBarSummary),
+		vscode.commands.registerCommand('waktusholat.stopAdzanSound', stopAdzanSound)
 	);
 
 	// register workspace event listeners

@@ -20,12 +20,25 @@ Data waktu sholat diambil dari https://github.com/lakuapik/jadwalsholatorg/tree/
 
 ![img alt](https://raw.githubusercontent.com/lakuapik/vscode-waktusholat/master/screenshots/waktunya-dzuhur.png)
 
+## Suara Adzan
+
+Ekstensi ini menggunakan perkakas [`play-sound`](https://www.npmjs.com/package/play-sound) untuk memutar suara adzan.
+
+Apabila suara adzan tidak terdengar, silahkan pasang aplikasi berikut ini:
+
+* Windows (belum di tes):
+* Ubuntu GNU/Linux
+  ```bash
+  $ sudo apt install mpg123
+  ```
+* MacOs (belum di tes): `afplay`
+
 ## Pengaturan
 
 ![img alt](https://raw.githubusercontent.com/lakuapik/vscode-waktusholat/master/screenshots/settings.png)
 
 * `waktusholat.kota`  
-  Waktu sholat mengikuti kota yang ditentukan.
+  Jadwal waktu sholat mengikuti kota yang ditentukan.
 
 ## Perintah
 
@@ -33,11 +46,11 @@ Data waktu sholat diambil dari https://github.com/lakuapik/jadwalsholatorg/tree/
 
 * `waktusholat.update`  
   Waktu Sholat : Update  
-  Memperbarui data waktu sholat.
+  Memperbarui data jadwal waktu sholat.
 
 * `waktusholat.selectCity`  
   Waktu Sholat : Pilih Kota  
-  Waktu sholat mengikuti kota yang ditentukan.
+  Jadwal waktu sholat mengikuti kota yang ditentukan.
 
 ## Ikon
 Icons made by [Freepik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](https://www.flaticon.com/free-icon/muslim-man-praying_84628)

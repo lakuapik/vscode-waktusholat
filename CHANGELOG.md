@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.6] - 2020-04-21
+### Added
+- Memutar suara adzan ketika waktu sholat tiba.
+
 ## [1.0.5] - 2019-11-08
 ### Added
 - Screenshoot tampilan
