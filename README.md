@@ -1,5 +1,9 @@
 # Waktu Sholat
 
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/lakuapik.waktusholat.svg?tyle=flat-square)](https://marketplace.visualstudio.com/items?itemName=lakuapik.waktusholat)
+[![Installs](https://vsmarketplacebadge.apphb.com/installs-short/lakuapik.waktusholat.svg?tyle=flat-square)](https://marketplace.visualstudio.com/items?itemName=lakuapik.waktusholat)
+[![Rating](https://vsmarketplacebadge.apphb.com/rating-star/lakuapik.waktusholat.svg?tyle=flat-square)](https://marketplace.visualstudio.com/items?itemName=lakuapik.waktusholat)
+
 Ekstensi Visual Studio Code (vscode) untuk menampilkan dan mengingatkan waktu sholat.
 
 > [PENTING] Ubah kota di pengaturan setelah Anda selesai memasang ekstensi ini.
