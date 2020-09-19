@@ -4,7 +4,7 @@ const vscode = require('vscode');
 const player = require('play-sound')({});
 const request = require('request-promise');
 
-const baseUrl = 'https://raw.githubusercontent.com/lakuapik/jadwalsholatorg/master/adzan/';
+const baseUrl = 'https://raw.githubusercontent.com/lakuapik/jadwalsholatorg/master/';
 
 const todayUk = new Date().toLocaleDateString('UK');
 const month = todayUk.substr(3, 2);
@@ -14,29 +14,38 @@ const today = year + '-' + month + '-' + day;
 
 let audio;
 let basePath;
+let globalState;
 let statusBar;
 let statusBarAudio;
 
 /**
+ * @returns {Array}
+ */
+const audios = [
+    'sheikh_abdul_karim_omar_fatani_al_makki_adzan.mp3',
+    'sheikh_abdul_karim_omar_fatani_al_makki_adzan_fajr.mp3',
+];
+
+/**
  * Get current city from configuration.
  *
- * @returns {string}
+ * @returns {String}
  */
 const getCity = () => vscode.workspace.getConfiguration('waktusholat').get('kota');
 
 /**
  * Get path of waktusholat json file.
  *
- * @returns {string}
+ * @returns {String}
  */
 const getJsonPath = () => basePath + getCity() + '-' + year + '-' + month + '.json';
 
 /**
  * Get url of waktusholat json file.
  *
- * @returns {string}
+ * @returns {String}
  */
-const getJsonUrl = () => baseUrl + getCity() + '/' + year + '/' + month + '.json';
+const getJsonUrl = () => baseUrl + "adzan/" + getCity() + '/' + year + '/' + month + '.json';
 
 /**
  * Get waktusholat json file.
@@ -45,15 +54,15 @@ const getJsonUrl = () => baseUrl + getCity() + '/' + year + '/' + month + '.json
  * @returns {Array<Object>}
  */
 const getJsonFile = () => {
-	let content = '[]';
+    let content = '[]';
 
-	try {
-		content = fs.readFileSync(getJsonPath()).toString();
-	} catch (error) {
-		queryAndSave();
-	}
+    try {
+        content = fs.readFileSync(getJsonPath()).toString();
+    } catch (error) {
+        queryAndSave();
+    }
 
-	return JSON.parse(content);
+    return JSON.parse(content);
 }
 
 /**
@@ -62,9 +71,9 @@ const getJsonFile = () => {
  * @retuns {Object<lodash>}
  */
 const todaySchedule = () => {
-	const schedules = _(getJsonFile());
+    const schedules = _(getJsonFile());
 
-	return _(schedules.find((sch) => sch.tanggal == today));
+    return _(schedules.find((sch) => sch.tanggal == today));
 }
 
 /**
@@ -75,16 +84,16 @@ const todaySchedule = () => {
  * @retuns {Object<lodash>}
  */
 const todayAdzans = () => {
-	const adzans = todaySchedule().omit(['tanggal']);
+    const adzans = todaySchedule().omit(['tanggal']);
 
-	return adzans.map(function(key, val) {
-		return {
-			'time': key,
-			'adzan': val.toString(),
-			'timestamp': new Date(today + ' ' + key).getTime(),
-			'timehuman': timeHuman(new Date(today + ' ' + key).getTime()),
-		}
-	}).sortBy('timestamp');
+    return adzans.map(function(key, val) {
+        return {
+            'time': key,
+            'adzan': val.toString(),
+            'timestamp': new Date(today + ' ' + key).getTime(),
+            'timehuman': timeHuman(new Date(today + ' ' + key).getTime()),
+        }
+    }).sortBy('timestamp');
 }
 
 /**
@@ -93,17 +102,17 @@ const todayAdzans = () => {
  * @returns {Object}
  */
 const nextAdzan = () => {
-	let next = {adzan: ''};
-	let today = todayAdzans();
+    let next = {adzan: ''};
+    let today = todayAdzans();
 
-	for (let i = 0; i < today.size(); i++) {
-		if (today.get(i).timestamp >= _.now()) {
-			next = today.get(i);
-			break;
-		}
-	}
+    for (let i = 0; i < today.size(); i++) {
+        if (today.get(i).timestamp >= _.now()) {
+            next = today.get(i);
+            break;
+        }
+    }
 
-	return next;
+    return next;
 }
 
 /**
@@ -112,18 +121,18 @@ const nextAdzan = () => {
  * @returns {Object}
  */
 const prevAdzan = () => {
-	let prev = {adzan: ''};
-	let today = todayAdzans();
+    let prev = {adzan: ''};
+    let today = todayAdzans();
 
-	for (let i = 0; i < today.size(); i++) {
-		let tgi = today.get(i);
-		if (tgi.adzan != 'imsyak' && tgi.timestamp >= _.now()) {
-			prev = today.get(i - 1);
-			break;
-		}
-	}
+    for (let i = 0; i < today.size(); i++) {
+        let tgi = today.get(i);
+        if (tgi.adzan != 'imsyak' && tgi.timestamp >= _.now()) {
+            prev = today.get(i - 1);
+            break;
+        }
+    }
 
-	return prev;
+    return prev;
 }
 
 /**
@@ -145,18 +154,18 @@ const diffHoursFromNow = (time) => Math.floor((time - _.now()) / (60 * 60 * 1000
  *
  * @param {number} time unix timestamp
  *
- * @returns {string}
+ * @returns {String}
  */
 const timeHuman = (time) => {
-	const hours = diffHoursFromNow(time);
-	const minutes = diffMinsFromNow(time) % 60;
+    const hours = diffHoursFromNow(time);
+    const minutes = diffMinsFromNow(time) % 60;
 
-	let result = '';
-	if (hours > 0) result += hours + ' jam ';
-	if (minutes > 0) result += minutes + ' menit lagi';
-	if (minutes <= 0) result = 'sekarang!';
+    let result = '';
+    if (hours > 0) result += hours + ' jam ';
+    if (minutes > 0) result += minutes + ' menit lagi';
+    if (minutes <= 0) result = 'sekarang!';
 
-	return result;
+    return result;
 }
 
 /**
@@ -165,17 +174,17 @@ const timeHuman = (time) => {
  * @returns {void}
  */
 const cmdUpdate = () => {
-	console.log('cmdUpdate', getCity());
+    console.log('cmdUpdate', getCity());
 
-	// create message box with progress bar
-	vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: 'Waktu Sholat: Updating ' + getCity() + '...',
-	}, () => {
-		return queryAndSave().then(() => {
-			statusBarUpdate();
-		});
-	});
+    // create message box with progress bar
+    vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: 'Waktu Sholat: Updating ' + getCity() + '...',
+    }, () => {
+        return queryAndSave().then(() => {
+            statusBarUpdate();
+        });
+    });
 }
 
 /**
@@ -184,17 +193,17 @@ const cmdUpdate = () => {
  * @returns {void}
  */
 const cmdSelectCity = () => {
-	console.log('cmdSelectCity');
+    console.log('cmdSelectCity');
 
-	// list of avaiable cities
-	const cities = ["ambarawa", "ambon", "amlapura", "amuntai", "argamakmur", "atambua", "babo", "bagansiapiapi", "bahaurkalteng", "bajawa", "balige", "balikpapan", "bandaaceh", "bandarlampung", "bandung", "bangkalan", "bangkinang", "bangko", "bangli", "banjar", "banjarbaru", "banjarmasin", "banjarnegara", "bantaeng", "banten", "bantul", "banyuwangi", "barabai", "barito", "barru", "batam", "batang", "batu", "baturaja", "batusangkar", "baubau", "bekasi", "bengkalis", "bengkulu", "benteng", "biak", "bima", "binjai", "bireuen", "bitung", "blitar", "blora", "bogor", "bojonegoro", "bondowoso", "bontang", "boyolali", "brebes", "bukittinggi", "bulasbtmaluku", "bulukumba", "buntok", "cepu", "ciamis", "cianjur", "cibinong", "cilacap", "cilegon", "cimahi", "cirebon", "curup", "demak", "denpasar", "depok", "dili", "dompu", "donggala", "dumai", "ende", "enggano", "enrekang", "fakfak", "garut", "gianyar", "gombong", "gorontalo", "gresik", "gunungsitoli", "indramayu", "jakartabarat", "jakartapusat", "jakartaselatan", "jakartatimur", "jakartautara", "jambi", "jayapura", "jember", "jeneponto", "jepara", "jombang", "kabanjahe", "kalabahi", "kalianda", "kandangan", "karanganyar", "karawang", "kasungan", "kayuagung", "kebumen", "kediri", "kefamenanu", "kendal", "kendari", "kertosono", "ketapang", "kisaran", "klaten", "kolaka", "kotabarupulaulaut", "kotabumi", "kotajantho", "kotamobagu", "kualakapuas", "kualakurun", "kualapembuang", "kualatungkal", "kudus", "kuningan", "kupang", "kutacane", "kutoarjo", "labuhan", "lahat", "lamongan", "langsa", "larantuka", "lawang", "lhoseumawe", "limboto", "lubukbasung", "lubuklinggau", "lubukpakam", "lubuksikaping", "lumajang", "luwuk", "madiun", "magelang", "magetan", "majalengka", "majene", "makale", "makassar", "malang", "mamuju", "manna", "manokwari", "marabahan", "maros", "martapurakalsel", "masambasulsel", "masohi", "mataram", "maumere", "medan", "mempawah", "menado", "mentok", "merauke", "metro", "meulaboh", "mojokerto", "muarabulian", "muarabungo", "muaraenim", "muarateweh", "muarosijunjung", "muntilan", "nabire", "negara", "nganjuk", "ngawi", "nunukan", "pacitan", "padang", "padangpanjang", "padangsidempuan", "pagaralam", "painan", "palangkaraya", "palembang", "palopo", "palu", "pamekasan", "pandeglang", "pangka_", "pangkajenesidenreng", "pangkalanbun", "pangkalpinang", "panyabungan", "par_", "parepare", "pariaman", "pasuruan", "pati", "payakumbuh", "pekalongan", "pekanbaru", "pemalang", "pematangsiantar", "pendopo", "pinrang", "pleihari", "polewali", "pondokgede", "ponorogo", "pontianak", "poso", "prabumulih", "praya", "probolinggo", "purbalingga", "purukcahu", "purwakarta", "purwodadigrobogan", "purwokerto", "purworejo", "putussibau", "raha", "rangkasbitung", "rantau", "rantauprapat", "rantepao", "rembang", "rengat", "ruteng", "sabang", "salatiga", "samarinda", "sambaskalbar", "sampang", "sampit", "sanggau", "sawahlunto", "sekayu", "selong", "semarang", "sengkang", "serang", "serui", "sibolga", "sidikalang", "sidoarjo", "sigli", "singaparna", "singaraja", "singkawang", "sinjai", "sintang", "situbondo", "slawi", "sleman", "soasiu", "soe", "solo", "solok", "soreang", "sorong", "sragen", "stabat", "subang", "sukabumi", "sukoharjo", "sumbawabesar", "sumedang", "sumenep", "sungailiat", "sungaipenuh", "sungguminasa", "surabaya", "surakarta", "tabanan", "tahuna", "takalar", "takengon", "tamianglayang", "tanahgrogot", "tangerang", "tanjungbalai", "tanjungenim", "tanjungpandan", "tanjungpinang", "tanjungredep", "tanjungselor", "tapaktuan", "tarakan", "tarutung", "tasikmalaya", "tebingtinggi", "tegal", "temanggung", "tembilahan", "tenggarong", "ternate", "tolitoli", "tondano", "trenggalek", "tual", "tuban", "tulungagung", "ujungberung", "ungaran", "waikabubak", "waingapu", "wamena", "watampone", "watansoppeng", "wates", "wonogiri", "wonosari", "wonosobo", "yogyakarta"];
+    // list of avaiable cities
+    const cities = ["ambarawa", "ambon", "amlapura", "amuntai", "argamakmur", "atambua", "babo", "bagansiapiapi", "bahaurkalteng", "bajawa", "balige", "balikpapan", "bandaaceh", "bandarlampung", "bandung", "bangkalan", "bangkinang", "bangko", "bangli", "banjar", "banjarbaru", "banjarmasin", "banjarnegara", "bantaeng", "banten", "bantul", "banyuwangi", "barabai", "barito", "barru", "batam", "batang", "batu", "baturaja", "batusangkar", "baubau", "bekasi", "bengkalis", "bengkulu", "benteng", "biak", "bima", "binjai", "bireuen", "bitung", "blitar", "blora", "bogor", "bojonegoro", "bondowoso", "bontang", "boyolali", "brebes", "bukittinggi", "bulasbtmaluku", "bulukumba", "buntok", "cepu", "ciamis", "cianjur", "cibinong", "cilacap", "cilegon", "cimahi", "cirebon", "curup", "demak", "denpasar", "depok", "dili", "dompu", "donggala", "dumai", "ende", "enggano", "enrekang", "fakfak", "garut", "gianyar", "gombong", "gorontalo", "gresik", "gunungsitoli", "indramayu", "jakartabarat", "jakartapusat", "jakartaselatan", "jakartatimur", "jakartautara", "jambi", "jayapura", "jember", "jeneponto", "jepara", "jombang", "kabanjahe", "kalabahi", "kalianda", "kandangan", "karanganyar", "karawang", "kasungan", "kayuagung", "kebumen", "kediri", "kefamenanu", "kendal", "kendari", "kertosono", "ketapang", "kisaran", "klaten", "kolaka", "kotabarupulaulaut", "kotabumi", "kotajantho", "kotamobagu", "kualakapuas", "kualakurun", "kualapembuang", "kualatungkal", "kudus", "kuningan", "kupang", "kutacane", "kutoarjo", "labuhan", "lahat", "lamongan", "langsa", "larantuka", "lawang", "lhoseumawe", "limboto", "lubukbasung", "lubuklinggau", "lubukpakam", "lubuksikaping", "lumajang", "luwuk", "madiun", "magelang", "magetan", "majalengka", "majene", "makale", "makassar", "malang", "mamuju", "manna", "manokwari", "marabahan", "maros", "martapurakalsel", "masambasulsel", "masohi", "mataram", "maumere", "medan", "mempawah", "menado", "mentok", "merauke", "metro", "meulaboh", "mojokerto", "muarabulian", "muarabungo", "muaraenim", "muarateweh", "muarosijunjung", "muntilan", "nabire", "negara", "nganjuk", "ngawi", "nunukan", "pacitan", "padang", "padangpanjang", "padangsidempuan", "pagaralam", "painan", "palangkaraya", "palembang", "palopo", "palu", "pamekasan", "pandeglang", "pangka_", "pangkajenesidenreng", "pangkalanbun", "pangkalpinang", "panyabungan", "par_", "parepare", "pariaman", "pasuruan", "pati", "payakumbuh", "pekalongan", "pekanbaru", "pemalang", "pematangsiantar", "pendopo", "pinrang", "pleihari", "polewali", "pondokgede", "ponorogo", "pontianak", "poso", "prabumulih", "praya", "probolinggo", "purbalingga", "purukcahu", "purwakarta", "purwodadigrobogan", "purwokerto", "purworejo", "putussibau", "raha", "rangkasbitung", "rantau", "rantauprapat", "rantepao", "rembang", "rengat", "ruteng", "sabang", "salatiga", "samarinda", "sambaskalbar", "sampang", "sampit", "sanggau", "sawahlunto", "sekayu", "selong", "semarang", "sengkang", "serang", "serui", "sibolga", "sidikalang", "sidoarjo", "sigli", "singaparna", "singaraja", "singkawang", "sinjai", "sintang", "situbondo", "slawi", "sleman", "soasiu", "soe", "solo", "solok", "soreang", "sorong", "sragen", "stabat", "subang", "sukabumi", "sukoharjo", "sumbawabesar", "sumedang", "sumenep", "sungailiat", "sungaipenuh", "sungguminasa", "surabaya", "surakarta", "tabanan", "tahuna", "takalar", "takengon", "tamianglayang", "tanahgrogot", "tangerang", "tanjungbalai", "tanjungenim", "tanjungpandan", "tanjungpinang", "tanjungredep", "tanjungselor", "tapaktuan", "tarakan", "tarutung", "tasikmalaya", "tebingtinggi", "tegal", "temanggung", "tembilahan", "tenggarong", "ternate", "tolitoli", "tondano", "trenggalek", "tual", "tuban", "tulungagung", "ujungberung", "ungaran", "waikabubak", "waingapu", "wamena", "watampone", "watansoppeng", "wates", "wonogiri", "wonosari", "wonosobo", "yogyakarta"];
 
-	// show the quick pick
-	vscode.window.showQuickPick(cities, {
-		placeHolder: 'Jadwal Waktu sholat mengikuti kota yang ditentukan.',
-	}).then((value) => {
-		vscode.workspace.getConfiguration('waktusholat').update('kota', value, 1);
-	});
+    // show the quick pick
+    vscode.window.showQuickPick(cities, {
+        placeHolder: 'Jadwal Waktu sholat mengikuti kota yang ditentukan.',
+    }).then((value) => {
+        vscode.workspace.getConfiguration('waktusholat').update('kota', value, 1);
+    });
 }
 
 /**
@@ -203,16 +212,16 @@ const cmdSelectCity = () => {
  * @returns {Promise<void>}
  */
 const queryAndSave = () => {
-	console.log('queryAndSave', getCity());
+    console.log('queryAndSave', getCity());
 
-	// return request-promise
-	return request(getJsonUrl())
-		.then((body) => {
-			fs.writeFileSync(getJsonPath(), body);
-		}).catch((err) => {
-			console.log(err);
-			// vscode.window.showErrorMessage('Waktu Sholat: Update gagal, silahkan cek koneksi internet Anda.');
-		});
+    // return request-promise
+    return request(getJsonUrl())
+        .then((body) => {
+            fs.writeFileSync(getJsonPath(), body);
+        }).catch((err) => {
+            console.log(err);
+            // vscode.window.showErrorMessage('Waktu Sholat: Update gagal, silahkan cek koneksi internet Anda.');
+        });
 }
 
 /**
@@ -221,53 +230,56 @@ const queryAndSave = () => {
  * @returns {void}
  */
 const statusBarUpdate = () => {
-	console.log('statusBarUpdate', getCity());
+    console.log('statusBarUpdate', getCity());
 
-	let next = nextAdzan();
-	let prev = prevAdzan();
+    let next = nextAdzan();
+    let prev = prevAdzan();
 
-	let prevDiff = _.isEmpty(prev) ? -99 : diffMinsFromNow(prev.timestamp);
-	let nextDiff = _.isEmpty(next) ? -99 : diffMinsFromNow(next.timestamp);
+    let prevDiff = _.isEmpty(prev) ? -99 : diffMinsFromNow(prev.timestamp);
+    let nextDiff = _.isEmpty(next) ? -99 : diffMinsFromNow(next.timestamp);
 
-	let text = '', tooltip = '';
+    // debugging:
+    // let prevDiff = 0, nextDiff = -99;
 
-	// prev is still 10 mins from now
-	if (
-		(prevDiff <= 0 && prevDiff > -5 && prev.adzan == 'imsyak')
-		|| (prevDiff <= 0 && prevDiff > -10 && prev.adzan != 'imsyak')
-	){
-		text = _.isEmpty(prev.adzan)
-			 ? '🕌'
-			 : '🕌 WAKTUNYA '+ _.toUpper(prev.adzan);
-		tooltip = _.isEmpty(prev.adzan)
-				? ''
-				: 'Waktu ' + prev.adzan + ' ' + prev.time + ' telah tiba!';
-	}
-	// default
-	else {
-		text = _.isEmpty(next.adzan)
-			 ? '🕌'
-			 : '🕌 ' + next.adzan + ' ' + next.time;
-		tooltip = _.isEmpty(next.adzan)
-				? 'Alhamdulillah sudah 5 waktu.'
-				: 'Waktu ' + next.adzan + ' ' + next.timehuman;
-	}
+    let text = '', tooltip = '';
 
-	// updating status bar
-	statusBar.text = text;
-	statusBar.tooltip = tooltip;
-	statusBar.show();
+    // prev is still 10 mins from now
+    if (
+        (prevDiff <= 0 && prevDiff > -5 && prev.adzan == 'imsyak')
+        || (prevDiff <= 0 && prevDiff > -10 && prev.adzan != 'imsyak')
+    ){
+        text = _.isEmpty(prev.adzan)
+             ? '🕌'
+             : '🕌 WAKTUNYA '+ _.toUpper(prev.adzan);
+        tooltip = _.isEmpty(prev.adzan)
+                ? ''
+                : 'Waktu ' + prev.adzan + ' ' + prev.time + ' telah tiba!';
+    }
+    // default
+    else {
+        text = _.isEmpty(next.adzan)
+             ? '🕌'
+             : '🕌 ' + next.adzan + ' ' + next.time;
+        tooltip = _.isEmpty(next.adzan)
+                ? 'Alhamdulillah sudah 5 waktu.'
+                : 'Waktu ' + next.adzan + ' ' + next.timehuman;
+    }
 
-	// show message
-	if (prevDiff == 0) {
-		vscode.window.showInformationMessage(statusBar.tooltip);
-		if (['shubuh', 'dzuhur', 'ashr', 'magrib', 'isya'].includes(next.adzan)) {
-			playAdzanSound(next.adzan == 'shubuh');
-		}
-	}
-	if (nextDiff == 5) {
-		vscode.window.showInformationMessage(statusBar.tooltip);
-	}
+    // updating status bar
+    statusBar.text = text;
+    statusBar.tooltip = tooltip;
+    statusBar.show();
+
+    // show message
+    if (prevDiff == 0) {
+        vscode.window.showInformationMessage(statusBar.tooltip);
+        if (['shubuh', 'dzuhur', 'ashr', 'magrib', 'isya'].includes(next.adzan)) {
+            playAdzanSound(next.adzan, next.adzan == 'shubuh');
+        }
+    }
+    if (nextDiff == 5) {
+        vscode.window.showInformationMessage(statusBar.tooltip);
+    }
 }
 
 /**
@@ -276,31 +288,39 @@ const statusBarUpdate = () => {
  * @returns {void}
  */
 const statusBarSummary = () => {
-	vscode.window.showInformationMessage(statusBar.tooltip);
+    vscode.window.showInformationMessage(statusBar.tooltip);
 }
 
 /**
  * Play adzan sound from mp3 file.
  *
- * @param {boolean} isFajr
+ * @param {Boolean} isFajr
  *
  * @returns {void}
  */
-const playAdzanSound = (isFajr = false) => {
-	console.log('playAdzanSound...');
+const playAdzanSound = (adzan, isFajr = false) => {
+    console.log('playAdzanSound...');
 
-	const file = isFajr ? 'sheikh_abdul_karim_omar_fatani_al_makki_adzan_fajr.mp3'
-	                    : 'sheikh_abdul_karim_omar_fatani_al_makki_adzan.mp3';
+    downloadAdzanSound();
 
-	audio = player.play('./sounds/' + file, (err, opts, next) => {
-		next = stopAdzanSound();
-	});
+    const alreadyPlayedKey = 'waktusholat-adzan-played-' + today + "-" + adzan;
+    globalState.update('waktusholat-adzan-played-key', alreadyPlayedKey);
 
-	statusBarAudio = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-	statusBarAudio.text = '▶ Adzan Berkumandang...';
-	statusBarAudio.tooltip = '◼ Hentikan suara adzan.';
-	statusBarAudio.command = 'waktusholat.stopAdzanSound';
-	statusBarAudio.show();
+    if (globalState.get(alreadyPlayedKey)) return;
+
+    const audioFile = isFajr ? audios[1] : audios[0];
+
+    audio = player.play(basePath + audioFile, (err, opts, next) => {
+        if (err) console.log("playAdzanSound... ERROR", err);
+        globalState.update(alreadyPlayedKey, !Boolean(err));
+        next = stopAdzanSound();
+    });
+
+    statusBarAudio = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    statusBarAudio.text = '▶ Adzan Berkumandang...';
+    statusBarAudio.tooltip = '◼ Hentikan suara adzan.';
+    statusBarAudio.command = 'waktusholat.stopAdzanSound';
+    statusBarAudio.show();
 }
 
 /**
@@ -309,10 +329,45 @@ const playAdzanSound = (isFajr = false) => {
  * @returns {void}
  */
 const stopAdzanSound = () => {
-	console.log('stopAdzanSound...');
+    console.log('stopAdzanSound...');
 
-	audio && audio.kill();
-	statusBarAudio && statusBarAudio.dispose();
+    const alreadyPlayedKey = globalState.get('waktusholat-adzan-played-key');
+    globalState.update(alreadyPlayedKey, true);
+
+    audio && audio.kill();
+    statusBarAudio && statusBarAudio.dispose();
+}
+
+/**
+ * Download adzan sound.
+ *
+ * @returns {void}
+ */
+const downloadAdzanSound = () => {
+    console.log('downloadAdzanSound...');
+
+    audios.forEach(path => {
+        const audioPath = basePath + path;
+        const audioUrl = baseUrl + "adzan-mp3/" + path;
+
+        if (fs.existsSync(audioPath)) return;
+
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: 'Waktu Sholat: Downloading adzan mp3 ' + path,
+        }, () => {
+            return request(audioUrl, {
+                encoding: null, // binary won't work
+            }).then((body) => {
+                fs.writeFileSync(audioPath, body);
+                console.log("downloadAdzanSound: DOWNLOADED: ", audioUrl);
+            }).catch(err => {
+                console.log("downloadAdzanSound: ERROR:", audioUrl, err);
+            });
+        });
+    });
+
+
 }
 
 /**
@@ -323,56 +378,61 @@ const stopAdzanSound = () => {
  * @returns {void}
  */
 const activate = (context) => {
-	console.log('Selamat, ekstensi vscode "waktusholat" sudah aktif!');
+    console.log('Selamat, ekstensi vscode "waktusholat" sudah aktif!');
 
-	// set basePath
-	basePath = context.globalStoragePath + '/';
+    // set basePath
+    basePath = context.globalStoragePath + '/';
 
-	// check global storage path, create if not exists
-	if (!fs.existsSync(context.globalStoragePath)) {
-		fs.mkdirSync(context.globalStoragePath);
-	}
+    // check global storage path, create if not exists
+    if (!fs.existsSync(context.globalStoragePath)) {
+        fs.mkdirSync(context.globalStoragePath);
+    }
 
-	// check first open
-	// context.globalState.update('waktusholat-first-open', undefined);
-	if (context.globalState.get('waktusholat-first-open') === undefined) {
-		vscode.window.showInformationMessage(
-			`Terima kasih telah memasang ekstensi Waktu Sholat! \nKota saat ini: ` + getCity(),
-			{modal: true},
-			{title: 'Pilih Kota', 'action': 1}
-		).then(button => {
-			if (button === undefined) return;
-			if (button.action == 1) cmdSelectCity();
-			context.globalState.update('waktusholat-first-open', 'DONE');
-		});
-	}
+    // set globalState
+    globalState = context.globalState;
 
-	// set status bar
-	statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
-	statusBar.command = 'waktusholat.statusBarSummary';
+    // check first open
+    // globalState.update('waktusholat-first-open', undefined);
+    if (globalState.get('waktusholat-first-open') === undefined) {
+        downloadAdzanSound();
 
-	// register subscriptions
-	context.subscriptions.push(
-		statusBar,
-		vscode.commands.registerCommand('waktusholat.update', cmdUpdate),
-		vscode.commands.registerCommand('waktusholat.selectCity', cmdSelectCity),
-		vscode.commands.registerCommand('waktusholat.statusBarSummary', statusBarSummary),
-		vscode.commands.registerCommand('waktusholat.stopAdzanSound', stopAdzanSound)
-	);
+        vscode.window.showInformationMessage(
+            `Terima kasih telah memasang ekstensi Waktu Sholat! \nKota saat ini: ` + getCity(),
+            {modal: true},
+            {title: 'Pilih Kota', 'action': 1}
+        ).then(button => {
+            if (button === undefined) return;
+            if (button.action == 1) cmdSelectCity();
+            context.globalState.update('waktusholat-first-open', 'DONE');
+        });
+    }
 
-	// register workspace event listeners
-	vscode.workspace.onDidChangeConfiguration(cmdUpdate);
+    // set status bar
+    statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
+    statusBar.command = 'waktusholat.statusBarSummary';
 
-	// set to execute statusBarUpdate every minute
-	setInterval(statusBarUpdate, 1000 * 60);
+    // register subscriptions
+    context.subscriptions.push(
+        statusBar,
+        vscode.commands.registerCommand('waktusholat.update', cmdUpdate),
+        vscode.commands.registerCommand('waktusholat.selectCity', cmdSelectCity),
+        vscode.commands.registerCommand('waktusholat.statusBarSummary', statusBarSummary),
+        vscode.commands.registerCommand('waktusholat.stopAdzanSound', stopAdzanSound)
+    );
 
-	// if there is no waktusholat json file, execute cmdUpdate
-	if (!fs.existsSync(getJsonPath())) {
-		cmdUpdate();
-	}
+    // register workspace event listeners
+    vscode.workspace.onDidChangeConfiguration(cmdUpdate);
 
-	// execute statusBarUpdate
-	statusBarUpdate();
+    // set to execute statusBarUpdate every minute
+    setInterval(statusBarUpdate, 1000 * 60);
+
+    // if there is no waktusholat json file, execute cmdUpdate
+    if (!fs.existsSync(getJsonPath())) {
+        cmdUpdate();
+    }
+
+    // execute statusBarUpdate
+    statusBarUpdate();
 }
 
 /**
@@ -381,13 +441,13 @@ const activate = (context) => {
  * @returns {void}
  */
 const deactivate = () => {
-	// pass
+    // pass
 };
 
 /**
  * Module Exports
  */
 module.exports = {
-	activate,
-	deactivate
+    activate,
+    deactivate
 }

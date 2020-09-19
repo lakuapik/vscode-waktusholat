@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.1.0] - 2020-09-19
+### Added
+- Download berkas adzan mp3 dari internet
+
+### Fixed
+- Suara adzan tidak berputar
+
+### Removed
+- Hapus berkas adzan mp3, folder `sounds`
+
 ## [1.0.6] - 2020-04-21
 ### Added
 - Memutar suara adzan ketika waktu sholat tiba.
