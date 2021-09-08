@@ -1,14 +1,7 @@
-.vscode/**
-.vscode-test/**
-test/**
+*.vsix
 .gitignore
-**/jsconfig.json
-**/*.map
-**/.eslintrc.json
-
-# added after bundling
-node_modules
-out/
-src/
-webpack.config.js
+.vscode/
+CHANGELOG.md
+node_modules/
 screenshots/
+src/
