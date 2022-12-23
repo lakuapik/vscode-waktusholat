@@ -1,5 +1,10 @@
 # Change Log
 
+## [2.0.1] - 2022-12-23
+
+### Fixed
+- Gagal ketika pertama kali dibuka di windows (masalah mkdir) ([#15](https://github.com/lakuapik/vscode-waktusholat/pull/15))
+
 ## [2.0.0] - 2021-09-08
 
 Dirombak, dibuat lebih sederhana dan *maintainable*.
