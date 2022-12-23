@@ -2,7 +2,6 @@ import cities from './cities';
 import fetch from 'node-fetch';
 import { chain, map } from 'underscore';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { mkdir } from 'fs/promises';
 
 const vscode = require('vscode');
 const player = require('play-sound')({})
@@ -262,10 +261,14 @@ async function activate(context) {
   globalState = context.globalState;
   storagePath = context.globalStorageUri.path;
 
+  if (process.platform == 'win32') {
+    storagePath = storagePath.slice(1);
+  }
+
   // create storage path if not exists
   [storagePath, `${storagePath}/schedules`, `${storagePath}/audios`]
     .forEach(path => {
-      if (!existsSync(path)) mkdir(path, {recursive: true});
+      if (!existsSync(path)) mkdirSync(path);
     });
 
   // display welcome message for first open
