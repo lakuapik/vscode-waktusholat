@@ -2,6 +2,7 @@ import cities from './cities';
 import fetch from 'node-fetch';
 import { chain, map } from 'underscore';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { mkdir } from 'fs/promises';
 
 const vscode = require('vscode');
 const player = require('play-sound')({})
@@ -264,7 +265,7 @@ async function activate(context) {
   // create storage path if not exists
   [storagePath, `${storagePath}/schedules`, `${storagePath}/audios`]
     .forEach(path => {
-      if (!existsSync(path)) mkdirSync(path);
+      if (!existsSync(path)) mkdir(path, {recursive: true});
     });
 
   // display welcome message for first open
