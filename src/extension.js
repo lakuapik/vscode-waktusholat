@@ -261,6 +261,10 @@ async function activate(context) {
   globalState = context.globalState;
   storagePath = context.globalStorageUri.path;
 
+  if (process.platform == 'win32') {
+    storagePath = storagePath.slice(1);
+  }
+
   // create storage path if not exists
   [storagePath, `${storagePath}/schedules`, `${storagePath}/audios`]
     .forEach(path => {
